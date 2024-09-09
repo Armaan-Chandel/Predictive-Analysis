@@ -1,0 +1,45 @@
+data=iris;
+View(data);
+table(iris$Species);
+#round(prop.table(table(data$Species))*100,digits=1)
+normalize= function(x){
+  num=x-min(x)
+  denom=max(x)-min(x)
+  return(num/denom)
+}
+data_norm=as.data.frame(lapply(data[1:4],normalize))
+summary(data_norm)
+
+set.seed(1234);#container to use same sample 
+ran=sample(2,nrow(data),replace=TRUE, prob=c(0.70,0.30));#randonly pick value , or sample from the data , replace = if true- one row can be picked again and again , false- will not pick same row again
+table(ran)
+ran#each row is given a number 1 or 2 , the prob of giving 1 or 2 is prob, 
+
+#df=as.data.frame(data);
+df=data_norm;
+#train=rbind(df[1:36,],df[51:86,],df[101:136,]);
+#test=rbind(df[37:50,],df[87:100,],df[137:150,]);
+data.train=df[ran==1,1:4];# at whatever row we have 1 , we pick and put in test
+data.test=df[ran==2,1:4];# where we have 2 we pick and put in test
+data.train
+data.test
+data.trainlables=data[ran==1,5]
+data.testlables=data[ran==2,5];
+data.trainlables
+data.testlables
+
+
+library(class);
+data_prep=knn(train=data.train,test=data.test,cl=data.trainlables,k=15);
+data_prep#preditions for the test data;
+library(gmodels);
+CrossTable(x=data.testlables,y=data_prep,prop.chisq=FALSE);#x= actual answers, y=predictions , 
+
+tab=table(data_prep,data.testlables)
+tab
+
+accuracy=function(x){
+  i=(sum(diag(x))/sum(rowSums(x)))*100;
+  return(i)
+}
+accuracy(tab);
